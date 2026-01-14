@@ -1,15 +1,15 @@
 import React, { useRef, useState } from "react";
 import {
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 
 const CODE_LENGTH = 6;
@@ -64,7 +64,7 @@ export default function VerifyCodeScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        {/* Top Section */}
+
         <View style={styles.topHalf}>
            <Image
                       source={require("@/assets/logo/wMechanic2.png")}
@@ -73,14 +73,14 @@ export default function VerifyCodeScreen() {
           <Text style={styles.title}>Verify</Text>
         </View>
 
-        {/* Bottom Section */}
+       
         <View style={styles.bottomHalf}>
           <View style={styles.card}>
             <Text style={styles.subtitle}>
               Your code was sent to you via email
             </Text>
 
-            {/* OTP Inputs */}
+    
             <View style={styles.otpContainer}>
               {code.map((value, index) => (
                 <TextInput
@@ -98,7 +98,7 @@ export default function VerifyCodeScreen() {
               ))}
             </View>
 
-            {/* Verify Button */}
+
             <Pressable
               onPressIn={() => setIsPressed(true)}
               onPressOut={() => setIsPressed(false)}
@@ -115,7 +115,6 @@ export default function VerifyCodeScreen() {
               </Text>
             </Pressable>
 
-            {/* Resend */}
             <Text style={styles.resendText}>
               Didn’t receive code?
               <Text style={styles.resendLink}> Request again</Text>
