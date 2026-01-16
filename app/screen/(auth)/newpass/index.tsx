@@ -66,21 +66,6 @@ const handleReset = async () => {
   }
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
