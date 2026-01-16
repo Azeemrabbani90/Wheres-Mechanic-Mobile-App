@@ -16,6 +16,7 @@ export default function VerifyCodeScreen() {
   const [error, setError] = useState("");
   const [seconds, setSeconds] = useState(30);
   const [canResend, setCanResend] = useState(false);
+  const [Email, setEmail] = useState("");
   const [code, setCode] = useState<string[]>(
     Array(CODE_LENGTH).fill("")
   );
@@ -33,63 +34,41 @@ export default function VerifyCodeScreen() {
     }
   };
  // 🔁 Countdown Timer
-  // useEffect(() => {
-  //   if (seconds === 0) {
-  //     setCanResend(true);
-  //     return;
-  //   }
-
-  //   const timer = setInterval(() => {
-  //     setSeconds((prev) => prev - 1);
-  //   }, 1000);
-
-  //   return () => clearInterval(timer);
-  // }, [seconds]);
-
-const timerRef = useRef<any>(null);
-
- const startTimer = (duration: number) => {
-    setSeconds(duration);
-    setCanResend(false);
-
-    // clear existing timer
-    if (timerRef.current) clearInterval(timerRef.current);
-
-    timerRef.current = setInterval(() => {
-      setSeconds((prev) => {
-        if (prev <= 1) {
+const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+const startTimer = (duration: number) => {
+  // Old timer clear here
+  if (timerRef.current) {
+    clearInterval(timerRef.current);
+  }
+  setSeconds(duration);
+  setCanResend(false);
+  timerRef.current = setInterval(() => {
+    setSeconds((prev) => {
+      if (prev <= 1) {
+        if (timerRef.current) {
           clearInterval(timerRef.current);
-          setCanResend(true);
-          return 0;
+          timerRef.current = null;
         }
-        return prev - 1;
-      });
-    }, 1000);
+        setCanResend(true);
+        return 0;
+      }
+      return prev - 1;
+    });
+  }, 1000);
+};
+
+useEffect(() => {
+  startTimer(30);
+
+  return () => {
+    if (timerRef.current) clearInterval(timerRef.current);
   };
-
-  // start timer on mount
-  useEffect(() => {
-    startTimer(30);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
-
-
-
-
-
-
-
-
+}, []);
 
 const handleResendOTPAgain = async () => {
     if (!canResend) return;
-
     try {
       setError("");
-
       const response = await fetch(
         `${process.env.EXPO_PUBLIC_API_BASE_URL}/ResendOTP`,
         {
@@ -98,20 +77,16 @@ const handleResendOTPAgain = async () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            Email: email, // 🔐 encrypted email token
+            Email: email, 
           }),
         }
       );
-
       const data = await response.json();
       console.log("Resend OTP:", data);
 
       if (data.success === true) {
         Alert.alert("Success", data.message);
-
-        // 🔄 Reset timer
-        //setSeconds(30);
-        //setCanResend(false);
+        // Reset timer
         startTimer(30);
       } else {
         setError(data.message || "Failed to resend OTP");
@@ -121,15 +96,6 @@ const handleResendOTPAgain = async () => {
       setError("Something went wrong. Please try again.");
     }
   };
-
-
-
-
-
-
-
-
-
 
   const handleVerify = async (): Promise<void> => {
   const otp = code.join(""); 
@@ -153,7 +119,6 @@ const handleResendOTPAgain = async () => {
         }),
       }
     );
-
     const result = await response.json();
     if (!response.ok) {
       Alert.alert("Error", result.message || "OTP verification failed");
@@ -165,13 +130,11 @@ const handleResendOTPAgain = async () => {
        pathname: "../newpass",
        params: { email: result.data.email },
      });
-
   } catch (error) {
     console.error("Verify OTP error:", error);
     Alert.alert("Error", "Unable to connect to server");
   }
 };
-
   const handleKeyPress = (
   e: any,
   index: number
@@ -180,7 +143,6 @@ const handleResendOTPAgain = async () => {
     if (code[index] === "" && index > 0) {
       inputs.current[index - 1]?.focus();
     }
-
     const newCode = [...code];
     newCode[index] = "";
     setCode(newCode);
@@ -203,13 +165,11 @@ const handleResendOTPAgain = async () => {
           <Text style={styles.title}>Verify</Text>
         </View>
 
-       
         <View style={styles.bottomHalf}>
           <View style={styles.card}>
             <Text style={styles.subtitle}>
               Your code was sent to you via email
             </Text>
-
     
             <View style={styles.otpContainer}>
               {code.map((value, index) => (
@@ -228,7 +188,6 @@ const handleResendOTPAgain = async () => {
               ))}
             </View>
 
-
             <Pressable
               onPressIn={() => setIsPressed(true)}
               onPressOut={() => setIsPressed(false)}
@@ -245,12 +204,6 @@ const handleResendOTPAgain = async () => {
               </Text>
             </Pressable>
 
-            {/* <Text style={styles.resendText}>
-              Didn’t receive code?
-              <Pressable onPress={handleResendOTPAgain}>
-                <Text style={styles.resendLink}>Request again</Text>
-              </Pressable>
-            </Text> */}
             <View style={styles.resendContainer}>
               <Text style={styles.resendText}>Didn’t receive code?</Text>
 
@@ -264,14 +217,12 @@ const handleResendOTPAgain = async () => {
                 </Text>
               )}
             </View>
-
           </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
-
 
 const styles = StyleSheet.create({
   topHalf: {
@@ -354,19 +305,16 @@ const styles = StyleSheet.create({
     color: "#e2002b",
     fontWeight: "bold",
   },
-
-
-
-resendContainer: {
-  flexDirection: "row",
-  alignItems: "baseline",
-  marginTop: 15,
-  gap: 6,
-},
-timerText: {
-  fontSize: 15,
-  color: "#080404",
-},
+  resendContainer: {
+   flexDirection: "row",
+   alignItems: "baseline",
+   marginTop: 15,
+   gap: 6,
+  },
+  timerText: {
+   fontSize: 15,
+   color: "#080404",
+  },
 
 });
 
